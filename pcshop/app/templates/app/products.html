@@ -1,0 +1,81 @@
+{% extends 'app/base.html' %}
+
+{% block title %} Products {% endblock %}
+
+
+
+{% block content %}
+
+
+Products
+<section class="py-5">
+    <div class="container px-4 px-lg-5 mt-5">
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            {% for product in products %}
+            <div class="col mb-5">
+                <div class="card h-100">
+                    <!-- Product Image -->
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+
+                    <!-- Product Details -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <h5 class="fw-bolder">{{ product.name }}</h5>
+                            <p>${{ product.price }}</p>
+                        </div>
+                    </div>
+
+                    <!-- View Product Button -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-dark mt-auto" href="{% url 'app:details' product.id %}">View
+                                Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center">No products available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- {% for categories in category %}
+<h2>{{ categories.name }}</h2>
+<ul>
+    {% for product-set in category.product.all %}
+    <li>{{ product.name }} - ${{ product.price }}</li>
+    {% endfor %}
+</ul>
+{% endfor %} -->
+
+<!-- <table border="1">
+    <tr>
+        <th>{{Products.name}}</th>
+        <th>{{Products.price}}</th>
+        <th>{{Products.description}}</th>
+    </tr> -->
+<!-- <tr>
+        <td>Intel Core i7</td>
+        <td>$350</td>
+        <td><a href="{% url 'app:details' 1 %}">View Details</a></td>
+    </tr>
+    <tr>
+        <td>NVIDIA RTX 3070</td>
+        <td>$600</td>
+        <td><a href="{% url 'app:details' 2 %}">View Details</a></td>
+    </tr>
+    <tr>
+        <td>16GB DDR4 RAM</td>
+        <td>$80</td>
+        <td><a href="{% url 'app:details' 3 %}">View Details</a></td>
+    </tr>
+    <tr>
+        <td>1TB NVMe SSD</td>
+        <td>$120</td>
+        <td><a href="{% url 'app:details' 4 %}">View Details</a></td>
+    </tr> -->
+<!-- </table> -->
+
+{% endblock %}

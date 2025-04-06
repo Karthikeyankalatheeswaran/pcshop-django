@@ -1,0 +1,21 @@
+{% extends 'app/base.html' %}
+
+
+{% block title %} product details {% endblock %}
+
+
+{% block content %}
+<h1>Details of the product {{ product.id }}</h1>
+
+<div class="container mt-5">
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-detail-image">
+    <h2>{{ product.name }}</h2>
+    <h4>Brand: {{ product.brand }}</h4>
+    <h4>Category: {{ product.category }}</h4>
+    <h4>Price: ${{ product.price }}</h4>
+    <p>{{ product.description }}</p>
+
+    <a href="{% url 'app:products' %}">Back to Products</a>
+</div>
+
+{% endblock %}

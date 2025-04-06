@@ -1,0 +1,49 @@
+Product Section
+<section class="py-5">
+    <div class="container px-4 px-lg-5 mt-5">
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            {% for product in products %}
+            <div class="col mb-5">
+                <div class="card h-100">
+                    <!-- Product Image -->
+                    <img class="card-img-top" src="{{ product.image.url }}" alt="{{ product.name }}" />
+
+                    <!-- Product Details -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <h5 class="fw-bolder">{{ product.name }}</h5>
+                            <p>${{ product.price }}</p>
+                        </div>
+                    </div>
+
+                    <!-- View Product Button -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-dark mt-auto" href="{% url 'app:details' product.id %}">View
+                                Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center">No products available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+
+
+<h1>Details of the product {{ product.id }}</h1>
+
+<div class="container mt-5">
+    <h2>{{ product.name }}</h2>
+    <h4>Brand: {{ product.brand }}</h4>
+    <h4>Category: {{ product.category }}</h4>
+    <h4>Price: ${{ product.price }}</h4>
+    <p>{{ product.description }}</p>
+
+    <a href="{% url 'app:products' %}">Back to Products</a>
+    <a href="{% url 'app:generate_product' product.id %}" class="btn btn-primary">Generate Description & Image</a>
+</div>
