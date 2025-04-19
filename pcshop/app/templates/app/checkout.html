@@ -1,0 +1,30 @@
+{% extends 'app/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Checkout</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="address" class="form-label">Shipping Address</label>
+            <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+        </div>
+
+        <h5>Order Summary:</h5>
+        <ul class="list-group mb-3">
+            {% for item in cart_items %}
+            <li class="list-group-item d-flex justify-content-between">
+                <span>{{ item.product.name }} (x{{ item.quantity }})</span>
+                <strong>${{ item.product.price|floatformat:2 }}</strong>
+            </li>
+            {% endfor %}
+            <li class="list-group-item d-flex justify-content-between">
+                <strong>Total:</strong>
+                <strong>${{ total|floatformat:2 }}</strong>
+            </li>
+        </ul>
+
+        <button type="submit" class="btn btn-success">Confirm Order</button>
+    </form>
+</div>
+{% endblock %}

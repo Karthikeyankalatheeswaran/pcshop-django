@@ -32,6 +32,9 @@ Products
                                 Details</a>
                         </div>
                     </div>
+                    <a href="{% url 'app:add_to_cart' product.id %}" class="btn btn-outline-primary">
+                        Add to Cart
+                    </a>
                 </div>
             </div>
             {% empty %}

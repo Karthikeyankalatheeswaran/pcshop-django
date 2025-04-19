@@ -1,0 +1,8 @@
+Django>=5.0,<6.0
+gunicorn  # for production server
+psycopg2-binary  # for PostgreSQL DB connection
+
+djangorestframework  # if you're using DRF
+Pillow               # if you're uploading images
+whitenoise           # if you're serving static files in Docker
+python-dotenv        # for using .env files

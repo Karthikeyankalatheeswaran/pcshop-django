@@ -1,0 +1,25 @@
+{% extends 'app/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Order Confirmed</h2>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Shipping To: {{ order.address }}</p>
+    <p>Ordered At: {{ order.ordered_at }}</p>
+
+    <h5>Order Items:</h5>
+    <ul class="list-group mb-3">
+        {% for item in items %}
+        <li class="list-group-item d-flex justify-content-between">
+            <span>{{ item.product.name }} (x{{ item.quantity }})</span>
+            <span>₹{{ item.get_total_price|floatformat:2 }}</span>
+        </li>
+        {% endfor %}
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>Total Paid:</strong>
+            <strong>₹{{ order.total|floatformat:2 }}</strong>
+        </li>
+    </ul>
+
+    <a href="{% url 'app:products' %}" class="btn btn-primary">Continue Shopping</a>
+</div>
+{% endblock %}
