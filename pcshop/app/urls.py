@@ -23,6 +23,9 @@ urlpatterns = [
     path('user-details/', views.user_details, name='user_details'),
     path('logout/', views.logout_view, name='logout'),
     path('logout/', LogoutView.as_view(template_name='app/logout.html'), name='logout'),
+    path('myorders/', views.my_orders_view, name='myorders'),
+    path('user-details/edit/', views.edit_profile, name='edit_profile'),
+    path('thankyou/<int:order_id>/', views.thank_you, name='thank_you'),
 ]
 
 if settings.DEBUG:

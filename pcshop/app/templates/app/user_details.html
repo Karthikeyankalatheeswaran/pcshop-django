@@ -35,6 +35,7 @@
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">Account Details</h5>
                     </div>
+                    <a class="card-header bg-primary text-white" href="{% url 'app:edit_profile' %}">Edit Profile</a>
                     <div class="card-body">
                         <p><strong>Username:</strong> {{ user.username }}</p>
                         <p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
@@ -47,9 +48,9 @@
                         <h5 class="mb-0">Shipping Info</h5>
                     </div>
                     <div class="card-body">
-                        <p><strong>Address:</strong> {{ address|default:"Not Provided" }}</p>
-                        <p><strong>Phone:</strong> {{ phone_number|default:"Not Provided" }}</p>
-                        <p><strong>Pin Code:</strong> {{ pin_code|default:"Not Provided" }}</p>
+                        <p><strong>Saved Address:</strong> {{ user.address|default:"No address saved yet" }}</p>
+                        <p><strong>Phone:</strong> {{ user.phone }}</p>
+                        <p><strong>Pincode:</strong> {{ user.zip_code }}</p>
                     </div>
                 </div>
             </div>

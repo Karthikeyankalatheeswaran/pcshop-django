@@ -48,18 +48,20 @@
               aria-expanded="false">My Account</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
               <!-- <li><a class="dropdown-item" href="#!">Register</a></li>
-                <li><hr class="dropdown-divider" /></li> -->
-              <li>
-                <a class="dropdown-item" href="{% url 'app:login' %}">Login</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{% url 'app:register' %}">Register</a>
-              </li>
-            </ul>
-            <!-- <li class="nav-item">
+              <li> -->
+              <hr class="dropdown-divider" />
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'app:login' %}">Login</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'app:register' %}">Register</a>
+          </li>
+        </ul>
+        <!-- <li class="nav-item">
             <a class="nav-link" href="{% url 'app:mycart' %}">My Cart</a>
           </li> -->
-          </li>
+        </li>
         </ul>
         <!-- <form class="d-flex">
           <button class="btn btn-outline-dark" type="submit"> -->
@@ -73,7 +75,16 @@
       </div>
     </div>
   </nav>
-
+  {% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- Header-->
   {%block content%}

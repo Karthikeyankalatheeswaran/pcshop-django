@@ -16,7 +16,7 @@
         {% endfor %}
         <li class="list-group-item d-flex justify-content-between">
             <strong>Total Paid:</strong>
-            <strong>₹{{ order.total|floatformat:2 }}</strong>
+            <strong>${{ order.total|floatformat:2 }}</strong>
         </li>
     </ul>
 
