@@ -6,47 +6,6 @@
 // prettier - ignore
 
 {% block content %}
-<!-- cart.html -->
-<!-- 
-{% if user.is_authenticated %}
-{% if cart_items %}
-<h2>My Cart</h2>
-<ul>
-    {% for item in cart_items %}
-    <li>{{ item.product.name }} - Quantity: {{ item.quantity }}</li>
-    {% endfor %}
-</ul>
-<a href="{% url 'app:checkout' %}">Checkout</a>
-{% else %}
-<p>Your cart is empty. <a href="{% url 'app:products' %}">Browse products</a></p>
-{% endif %}
-{% else %}
-<p>Please <a href="{% url 'app:login' %}">Login</a> or <a href="{% url 'app:register' %}">Register</a> to view your
-    cart.</p>
-{% endif %} -->
-
-<!-- <div class="container mt-5">
-    <h2 class="mb-4">My Cart</h2>
-
-    {% if cart_items %}
-    <ul class="list-group mb-4">
-        {% for item in cart_items %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ item.product.name }}
-            <span class="badge bg-primary rounded-pill">{{ item.quantity }}</span>
-        </li>
-        <a href="{% url 'app:update_cart_item' item.id 'increase' %}">➕</a>
-        <a href="{% url 'app:update_cart_item' item.id 'decrease' %}">➖</a>
-        <a href="{% url 'app:remove_from_cart' item.id %}" class="btn btn-danger btn-sm">Remove</a>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'app:checkout' %}" class="btn btn-success">Proceed to Checkout</a>
-    {% else %}
-    <div class="alert alert-info">
-        Your cart is empty. <a href="{% url 'app:products' %}">Browse products</a> to add some!
-    </div>
-    {% endif %}
-</div> -->
 
 <div class="container mt-5">
     <h2 class="mb-4">My Cart</h2>

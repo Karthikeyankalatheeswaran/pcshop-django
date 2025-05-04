@@ -1,44 +1,72 @@
 {% extends 'app/base.html' %}
 {% block content %}
+<style>
+    .checkout-card {
+        animation: fadeInUp 0.6s ease;
+        border-radius: 1rem;
+        box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        background-color: #fff;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+</style>
+
 <div class="container mt-5">
-    <h2>Checkout</h2>
+    <div class="checkout-card">
+        <h2 class="mb-4 text-primary">Checkout</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="full_name">Full Name</label>
-                <input type="text" name="full_name" class="form-control" value="{{ user.get_full_name }}" required>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text" name="full_name" class="form-control" value="{{ user.get_full_name }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" value="{{ user.phone }}">
+                </div>
+                <div class="col-md-12">
+                    <label for="street" class="form-label">Street Address</label>
+                    <input type="text" name="street" class="form-control" value="{{ user.street }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" name="city" class="form-control" value="{{ user.city }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" name="state" class="form-control" value="{{ user.state }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="zip_code" class="form-label">Zip Code</label>
+                    <input type="text" name="zip_code" class="form-control" value="{{ user.zip_code }}" required>
+                </div>
+                <div class="col-md-12">
+                    <label for="landmark" class="form-label">Landmark (Optional)</label>
+                    <input type="text" name="landmark" class="form-control" value="{{ user.landmark }}">
+                </div>
             </div>
-            <div class="col-md-6">
-                <label for="phone">Phone Number</label>
-                <input type="text" name="phone" class="form-control" value="{{ user.phone }}">
-            </div>
-            <div class="col-md-12">
-                <label for="street">Street Address</label>
-                <input name="street" value="{{ request.user.street }}">
-            </div>
-            <div class="col-md-4">
-                <label for="city">City</label>
-                <input name="city" value="{{ request.user.city }}">
-            </div>
-            <div class="col-md-4">
-                <label for="state">State</label>
-                <input type="text" name="state" class="form-control" value="{{ user.state }}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="zip_code">Zip Code</label>
-                <input type="text" name="zip_code" class="form-control" value="{{ user.zip_code }}" required>
-            </div>
-            <div class="col-md-12">
-                <label for="landmark">Landmark (Optional)</label>
-                <input type="text" name="landmark" class="form-control" value="{{ user.landmark }}">
-            </div>
-        </div>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Proceed to Checkout</button>
-        </div>
-    </form>
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-success px-4 py-2 shadow-sm">Proceed to Checkout</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

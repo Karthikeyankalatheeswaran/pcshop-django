@@ -16,7 +16,7 @@
   <link href="{% static 'app/css/styles.css' %}" rel="stylesheet" />
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
   <!-- Navigation-->
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container px-4 px-lg-5">
@@ -89,17 +89,19 @@
   <!-- Header-->
   {%block content%}
   <header class="bg-dark py-5">
-    <div class="container px-4 px-lg-5 my-5">
+    <div class="container px-4 px-lg-5 my-5" ,height : 100%;>
       <div class="text-center text-white">
-        <h1 class="display-4 fw-bolder">We Sell</h1>
-        <p class="lead fw-normal text-white-50 mb-0">your PC Parts</p>
+        <section class="hero text-white text-center py-5 bg-dark">
+          <h1 class="display-4 fw-bolder">We Sell</h1>
+          <p class="lead fw-normal text-white-50 mb-0">your PC Parts</p>
+        </section>
       </div>
     </div>
   </header>
 
   {%endblock%}
 
-  <div class="text-center py-3 bg-light">
+  <div class="text-center py-2 bg-light border-top">
     {% if user.is_authenticated %}
     <p>Welcome, {{ user.username }}</p>
     {% else %}
@@ -109,7 +111,7 @@
 
 
   <!-- Footer-->
-  <footer class="py-5 bg-dark">
+  <footer class="bg-dark text-white text-center py-3 mt-auto">
     <div class="container">
       <p class="m-0 text-center text-white">
         Copyright &copy; Karthikeyan.K 3rd year CSE 2025

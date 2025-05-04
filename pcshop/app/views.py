@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Product,Category,Cart,CartItem,CustomUser,Order,OrderItem,Profile,Brand
+from .models import Product,Category,Cart,CartItem,CustomUser,Order,OrderItem,Profile,Brand,Review,Wishlist
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login as auth_login , get_user_model
@@ -11,8 +11,11 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.views.decorators.http import require_POST
-from .forms import UserUpdateForm
-
+from .forms import UserUpdateForm,ReviewForm
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.contrib import messages
 
 # Create your views here.
 def base(request):
@@ -53,6 +56,21 @@ def search(request):
         'category_filter': category_filter,
         'brand_filter': brand_filter
     })
+
+def search_suggestions(request):
+    query = request.GET.get('q', '')
+    results = []
+
+    if query:
+        product_matches = Product.objects.filter(name__icontains=query)[:6]
+        category_matches = Category.objects.filter(name__icontains=query)[:4]
+
+        results += [{'name': p.name, 'type': 'Product'} for p in product_matches]
+        results += [{'name': c.name, 'type': 'Category'} for c in category_matches]
+
+    return JsonResponse({'results': results})
+
+
 
 def login(request):
         if request.method == 'POST':
@@ -288,15 +306,68 @@ def logout_view(request):
 #     return render(request, 'app/details.html', {'productid': product_id})
 
 def products(request):
-    product_list = Product.objects.all()
-    return render(request, 'app/products.html', {'products': product_list})
+    sort_by = request.GET.get('sort', 'name')  # Default sort
+    sort_options = {
+        'price_asc': 'price',
+        'price_desc': '-price',
+        'name': 'name',
+        'name_desc': '-name',
+        'latest': '-id',
+    }
+    sort_field = sort_options.get(sort_by, 'name')
+
+    product_list = Product.objects.all().order_by(sort_field)
+
+    paginator = Paginator(product_list, 8)  # Show 8 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'sort': sort_by,
+    }
+    return render(request, 'app/products.html', context)
 
 
 def details(request, product_id):
-    product = get_object_or_404(Product, id=product_id)  
-    return render(request, 'app/details.html', {'product': product})
+    product = get_object_or_404(Product, id=product_id) 
+    reviews = Review.objects.filter(product=product) 
+    form = ReviewForm()
+    related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:4]
 
     
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            return redirect('app:details', product_id=product.id)
+    else:
+        form = ReviewForm()
+        
+    return render(request, 'app/details.html',
+        {'product': product,
+        'reviews': reviews,
+        'form': form,
+        'related_products': related_products})
 
+@login_required
+def add_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    Wishlist.objects.get_or_create(user=request.user, product=product)
+    messages.success(request, 'Added to wishlist!')
+    return redirect('app:details', product_id=product.id)
 
+@login_required
+def view_wishlist(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+    return render(request, 'app/wishlist.html', {'wishlist_items': wishlist_items})
+
+@login_required
+def remove_from_wishlist(request, product_id):
+    Wishlist.objects.filter(user=request.user, product_id=product_id).delete()
+    messages.success(request, 'Removed from wishlist.')
+    return redirect('app:view_wishlist')
 

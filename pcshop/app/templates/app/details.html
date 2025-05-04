@@ -1,21 +1,107 @@
 {% extends 'app/base.html' %}
 
-
-{% block title %} product details {% endblock %}
-
+{% block title %}Product Details{% endblock %}
 
 {% block content %}
-<h1>Details of the product {{ product.id }}</h1>
+<div class="container my-5">
 
-<div class="container mt-5">
-    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-detail-image">
-    <h2>{{ product.name }}</h2>
-    <h4>Brand: {{ product.brand }}</h4>
-    <h4>Category: {{ product.category }}</h4>
-    <h4>Price: ${{ product.price }}</h4>
-    <p>{{ product.description }}</p>
+    <!-- Product Display -->
+    <div class="row mb-5">
+        <!-- Image -->
+        <div class="col-md-5">
+            <img src="{{ product.image.url }}" class="img-fluid border rounded shadow-sm" alt="{{ product.name }}">
+        </div>
 
-    <a href="{% url 'app:products' %}">Back to Products</a>
+        <!-- Details -->
+        <div class="col-md-7">
+            <h2 class="fw-bold">{{ product.name }}</h2>
+            <p class="text-muted">{{ product.category.name }} | {{ product.brand.name }}</p>
+            <h4 class="text-success">₹{{ product.price }}</h4>
+            <p class="mt-3">{{ product.description }}</p>
+
+            <!-- Add to Cart / Wishlist -->
+            <div class="d-flex gap-2 mt-4">
+                <form method="post" action="{% url 'app:add_to_cart' product.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary px-4">Add to Cart</button>
+                </form>
+                <form method="post" action="{% url 'app:add_to_wishlist' product.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger px-4">Add to Wishlist</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="mt-5">
+        <h4 class="mb-3">You may also like</h4>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            {% for item in related_products %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ item.name }}</h6>
+                        <p class="card-text text-success mb-2">₹{{ item.price }}</p>
+                        <a href="{% url 'app:details' item.id %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">No similar products found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="my-5">
+
+    <!-- Review Section -->
+    <div class="mb-5">
+        <h4 class="mb-3">Leave a Review</h4>
+        {% if user.is_authenticated %}
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="mb-3">
+                {{ review_form.rating.label_tag }} {{ review_form.rating }}
+            </div>
+            <div class="mb-3">
+                {{ review_form.comment.label_tag }} {{ review_form.comment }}
+            </div>
+            <button type="submit" class="btn btn-success">Submit Review</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'app:login' %}">Log in</a> to leave a review.</p>
+        {% endif %}
+    </div>
+
+    <!-- Display Reviews -->
+    <div>
+        <h4 class="mb-3">Customer Reviews</h4>
+        {% if reviews %}
+        <ul class="list-group">
+            {% for review in reviews %}
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ review.user.username }}</strong>
+                    <span class="text-warning">{{ review.rating }} ★</span>
+                </div>
+                <small class="text-muted">{{ review.created_at|date:"F j, Y" }}</small>
+                <p class="mt-2 mb-0">{{ review.comment }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No reviews yet. Be the first to review!</p>
+        {% endif %}
+    </div>
+
+    <!-- Back to Products -->
+    <div class="mt-4">
+        <a href="{% url 'app:products' %}" class="btn btn-secondary">← Back to Products</a>
+    </div>
+
 </div>
-
 {% endblock %}

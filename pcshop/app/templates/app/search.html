@@ -4,8 +4,14 @@
     <h2>Search Products</h2>
 
     <form method="get" class="row g-3 mb-4">
-        <div class="col-md-4">
-            <input type="text" name="q" placeholder="Search by name..." class="form-control" value="{{ query }}">
+        <div class="col-md-4 position-relative">
+            <input type="text" name="q" id="search-input" placeholder="Search by name..." class="form-control"
+                value="{{ query }}" autocomplete="off">
+
+            <div id="suggestions-box" class="position-absolute bg-white border rounded mt-1 p-2 shadow-sm"
+                style="z-index: 1000; display: none; width: 100%;">
+                <div class="row" id="suggestions-grid"></div>
+            </div>
         </div>
         <div class="col-md-3">
             <select name="category" class="form-select">
@@ -32,30 +38,75 @@
         </div>
     </form>
 
+    {% if query %}
     {% if products %}
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
         {% for product in products %}
         <div class="col">
-            <div class="card h-100">
+            <div class="card mb-4">
                 <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                <div class="card-body text-center">
-                    <h5>{{ product.name }}</h5>
-                    <p>₹{{ product.price }}</p>
-                </div>
-                <div class="card-footer d-flex justify-content-around">
-                    <a href="{% url 'app:details' product.id %}" class="btn btn-sm btn-outline-dark">View</a>
-                    {% if product.stock > 0 %}
-                    <a href="{% url 'app:add_to_cart' product.id %}" class="btn btn-sm btn-outline-primary">Add</a>
-                    {% else %}
-                    <button class="btn btn-sm btn-secondary" disabled>Out of Stock</button>
-                    {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">₹{{ product.price }}</p>
+                    <a href="{% url 'app:details' product.id %}" class="btn btn-primary">View</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p>No products found.</p>
+    <p>No results found for "{{ query }}"</p>
+    {% endif %}
     {% endif %}
 </div>
+
+<script>
+    document.getElementById('search-input').addEventListener('input', function () {
+        const query = this.value.trim();
+        const suggestionsBox = document.getElementById('suggestions-box');
+        const suggestionsGrid = document.getElementById('suggestions-grid');
+
+        if (query.length < 2) {
+            suggestionsBox.style.display = 'none';
+            suggestionsGrid.innerHTML = '';
+            return;
+        }
+
+        fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsGrid.innerHTML = '';
+                if (data.results.length > 0) {
+                    data.results.forEach(item => {
+                        suggestionsGrid.innerHTML += `
+    <div class="col-6">
+        <div class="p-2 border rounded bg-light suggestion-item" data-name="${item.name}">
+            <strong>${item.name}</strong><br><small class="text-muted">${item.type}</small>
+        </div>
+    </div>`;
+                    });
+                    setTimeout(() => {
+                        document.querySelectorAll('.suggestion-item').forEach(item => {
+                            item.addEventListener('click', () => {
+                                document.getElementById('search-input').value = item.dataset.name;
+                                suggestionsBox.style.display = 'none';
+                            });
+                        });
+                    }, 100);
+                    suggestionsBox.style.display = 'block';
+                } else {
+                    suggestionsBox.style.display = 'none';
+                }
+            });
+    });
+
+    // Hide suggestions if clicked outside
+    document.addEventListener('click', function (e) {
+        if (!document.getElementById('search-input').contains(e.target) &&
+            !document.getElementById('suggestions-box').contains(e.target)) {
+            document.getElementById('suggestions-box').style.display = 'none';
+        }
+    });
+</script>
+
 {% endblock %}
