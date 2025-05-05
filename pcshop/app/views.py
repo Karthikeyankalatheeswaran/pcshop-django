@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Product,Category,Cart,CartItem,CustomUser,Order,OrderItem,Profile,Brand,Review,Wishlist
+from .models import Product,Category,Cart,CartItem,CustomUser,Order,OrderItem,Profile,Brand,Review,Wishlist,PCBuild
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login as auth_login , get_user_model
@@ -15,11 +15,15 @@ from .forms import UserUpdateForm,ReviewForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.contrib import messages
+from decimal import Decimal
+from collections import defaultdict
+from django.utils.text import slugify
+
 
 # Create your views here.
 def base(request):
     return render(request , 'app/base.html')
+
 
 def index(request):
     return render(request , 'app/index.html')
@@ -89,16 +93,19 @@ def login(request):
 
 @login_required
 def mycart(request):
-    try:
-        cart = Cart.objects.get(user=request.user)
-        cart_items = cart.items.all()
-    except Cart.DoesNotExist:
-        cart_items = None
+    items = []
+    total_amount = 0
 
-    context = {
-        'cart_items': cart_items,
-    }
-    return render(request, 'app/mycart.html', context)
+    if request.user.is_authenticated:
+        cart = Cart.objects.filter(user=request.user).first()
+        if cart:
+            items = CartItem.objects.filter(cart=cart)
+            total_amount = sum(item.product.price * item.quantity for item in items)
+
+    return render(request, 'app/mycart.html', {
+        'cart_items': items,
+        'total_amount': total_amount
+    })
 
 @login_required
 def add_to_cart(request, product_id):
@@ -371,3 +378,140 @@ def remove_from_wishlist(request, product_id):
     messages.success(request, 'Removed from wishlist.')
     return redirect('app:view_wishlist')
 
+
+# @login_required
+# def build_pc_view(request):
+#     categories = Category.objects.all()
+#     product_groups = {}
+#     excluded_categories = ['Monitor', 'Mouse', 'Keyboard', 'Headphones', 'Speakers', 'Case Fans', 'Thermal Paste']
+#     filtered_product_groups = {
+#     category: products
+#     for category, products in product_groups.items()
+#     if category not in excluded_categories
+#     }
+
+#     for category in categories:
+#         product_groups[category.name] = Product.objects.filter(category=category)
+
+#     # Get previous builds
+#     build_history = PCBuild.objects.filter(user=request.user).order_by('-created_at')
+#     return render(request, 'app/build_your_pc.html', {
+#         'product_groups': filtered_product_groups,
+#         'build_history': build_history,
+#     })
+
+@login_required
+def build_pc_view(request):
+    excluded_categories = [
+        "Case Fans", "Thermal Paste", "Monitor", 
+        "Keyboard", "Mouse", "Headphones", "Speakers"
+    ]
+
+    # Filter products that are not in excluded categories
+    products = Product.objects.select_related('category').exclude(category__name__in=excluded_categories)
+
+    # Group products by category
+    product_groups = defaultdict(list)
+    for product in products:
+        product_groups[product.category.name].append(product)
+
+    # Get user's previous builds
+    build_history = PCBuild.objects.filter(user=request.user).order_by('-created_at')
+
+    return render(request, 'app/build_your_pc.html', {
+        'product_groups': dict(product_groups),
+        'build_history': build_history,
+    })
+
+# @login_required
+# def save_pc_build(request):
+#     if request.method == 'POST':
+#         get_product = lambda key: (
+#         Product.objects.filter(id=request.POST.get(key)).first()
+#         if request.POST.get(key) else None
+#         )
+#         parts = {
+#             'cpu': get_product('cpu'),
+#             'motherboard': get_product('motherboard'),
+#             'ram': get_product('ram'),
+#             'gpu': get_product('gpu'),
+#             'storage': get_product('storage'),
+#             'psu': get_product('psu'),
+#             'cabinet': get_product('cabinet'),
+#         }
+
+#         total_price = sum(p.price for p in parts.values() if p)
+
+#         PCBuild.objects.create(user=request.user, total_price=total_price, **parts)
+#         return redirect('app:build_pc')
+    
+# @login_required
+# def delete_build(request, build_id):
+#     build = get_object_or_404(PCBuild, id=build_id, user=request.user)
+#     build.delete()
+#     return redirect('app:build_pc') 
+
+
+# def build_pc_view(request):
+#     excluded_categories = [
+#         "Case Fans", "Thermal Paste", "Monitor", 
+#         "Keyboard", "Mouse", "Headphones", "Speakers"
+#     ]
+
+#     # Filter out the unwanted categories
+#     products = Product.objects.select_related('category').exclude(category__name__in=excluded_categories)
+
+#     product_groups = defaultdict(list)
+#     for product in products:
+#         product_groups[product.category.name].append(product)
+
+#     return render(request, 'app/build_your_pc.html', {
+#         'product_groups': dict(product_groups)
+#     })
+
+
+@login_required
+def add_build_to_cart(request):
+    if request.method == 'POST':
+        cart, created = Cart.objects.get_or_create(user=request.user)
+
+        # Define the actual category names (from admin)
+        categories = [
+            "CPU (Processor)",
+            "Motherboard",
+            "Memory (RAM)",
+            "Internal Hard Drive (HDD)",
+            "Solid State Drive (SSD)",
+            "Graphics Card (GPU)",
+            "Power Supply Unit (PSU)",
+            "Computer Case (Cabinet)",
+            "CPU Cooler",
+            "Case Fans",
+            "Thermal Paste",
+            "Monitor",
+            "Keyboard",
+            "Mouse",
+            "Headphones / Headsets",
+            "Speakers",
+            "Operating Systems (OS)"
+        ]
+
+        selected_products = []
+
+        for cat in categories:
+            key = slugify(cat)  # Same as used in the template
+            product_id = request.POST.get(key)
+            if product_id:
+                product = Product.objects.filter(id=product_id).first()
+                if product:
+                    selected_products.append(product)
+
+        for product in selected_products:
+            existing = CartItem.objects.filter(cart=cart, product=product).first()
+            if existing:
+                existing.quantity += 1
+                existing.save()
+            else:
+                CartItem.objects.create(cart=cart, product=product, quantity=1)
+
+        return redirect('app:mycart')

@@ -21,6 +21,15 @@ class Brand(models.Model):
     
 
 class Product(models.Model):
+    CATEGORY_CHOICES = [
+        ('CPU', 'CPU'),
+        ('Motherboard', 'Motherboard'),
+        ('RAM', 'RAM'),
+        ('GPU', 'GPU'),
+        ('Storage', 'Storage'),
+        ('PSU', 'PSU'),
+        ('Cabinet', 'Cabinet'),
+    ]
     name = models.CharField(max_length=100)
     category = models.ForeignKey(Category,on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand,on_delete=models.CASCADE)
@@ -118,3 +127,19 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+    
+    
+class PCBuild(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pc_builds')
+    cpu = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='cpu_builds')
+    motherboard = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='motherboard_builds')
+    ram = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='ram_builds')
+    gpu = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='gpu_builds')
+    storage = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='storage_builds')
+    psu = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='psu_builds')
+    cabinet = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='cabinet_builds')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"PC Build for {self.user.username}"

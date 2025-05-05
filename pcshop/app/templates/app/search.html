@@ -1,63 +1,206 @@
 {% extends 'app/base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <h2>Search Products</h2>
+<style>
+    html,
+    body {
+        height: 100%;
+        background: #f5f7fa;
+    }
 
-    <form method="get" class="row g-3 mb-4">
-        <div class="col-md-4 position-relative">
-            <input type="text" name="q" id="search-input" placeholder="Search by name..." class="form-control"
-                value="{{ query }}" autocomplete="off">
+    #page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
 
-            <div id="suggestions-box" class="position-absolute bg-white border rounded mt-1 p-2 shadow-sm"
-                style="z-index: 1000; display: none; width: 100%;">
-                <div class="row" id="suggestions-grid"></div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <select name="category" class="form-select">
-                <option value="">All Categories</option>
-                {% for category in categories %}
-                <option value="{{ category.name }}" {% if category.selected %}selected{% endif %}>
-                    {{ category.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select name="brand" class="form-select">
-                <option value="">All Brands</option>
-                {% for brand in brands %}
-                <option value="{{ brand.name }}" {% if brand.selected %}selected{% endif %}>
-                    {{ brand.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
-        </div>
-    </form>
+    .search-section {
+        flex: 1 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 70vh;
+        padding-top: 2.5rem;
+        padding-bottom: 2.5rem;
+    }
 
-    {% if query %}
-    {% if products %}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        {% for product in products %}
-        <div class="col">
-            <div class="card mb-4">
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text">₹{{ product.price }}</p>
-                    <a href="{% url 'app:details' product.id %}" class="btn btn-primary">View</a>
+    .search-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem 2rem 1.5rem 2rem;
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 2rem;
+    }
+
+    .search-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #222;
+        text-align: left;
+    }
+
+    .search-card form {
+        margin-bottom: 0;
+    }
+
+    .search-card .form-control,
+    .search-card .form-select {
+        border-radius: 8px;
+        font-size: 1rem;
+        padding: 0.7rem 1rem;
+    }
+
+    .search-card .btn-primary {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.7rem 0;
+    }
+
+    .welcome-message {
+        margin: 2rem 0 1rem 0;
+        font-size: 1.15rem;
+        color: #444;
+        text-align: center;
+    }
+
+    .products-list {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .card.mb-4 {
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        transition: box-shadow 0.2s;
+        min-height: 350px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card.mb-4:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+    }
+
+    .card-img-top {
+        height: 170px;
+        object-fit: contain;
+        border-radius: 12px 12px 0 0;
+        background: #f9fafb;
+        padding: 10px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-text {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #B12704;
+        margin-bottom: 0.8rem;
+    }
+
+    .btn-primary {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.5rem 0;
+    }
+
+    .no-results {
+        margin: 2.5rem 0 0 0;
+        text-align: center;
+        color: #888;
+        font-size: 1.15rem;
+    }
+
+    @media (max-width: 600px) {
+        .search-card {
+            padding: 1.2rem 0.5rem 1rem 0.5rem;
+        }
+
+        .products-list {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<div id="page-wrapper">
+    <div class="search-section">
+        <div class="search-card">
+            <h2>Search Products</h2>
+            <form method="get" class="row g-3 mb-0">
+                <div class="col-md-4 position-relative">
+                    <input type="text" name="q" id="search-input" placeholder="Search by name..." class="form-control"
+                        value="{{ query }}" autocomplete="off">
+                    <div id="suggestions-box" class="position-absolute bg-white border rounded mt-1 p-2 shadow-sm"
+                        style="z-index: 1000; display: none; width: 100%;">
+                        <div class="row" id="suggestions-grid"></div>
+                    </div>
                 </div>
-            </div>
+                <div class="col-md-3">
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.name }}" {% if category.selected %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="brand" class="form-select">
+                        <option value="">All Brands</option>
+                        {% for brand in brands %}
+                        <option value="{{ brand.name }}" {% if brand.selected %}selected{% endif %}>
+                            {{ brand.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
         </div>
-        {% endfor %}
+        <div class="products-list">
+            {% if query %}
+            {% if products %}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card mb-4">
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">₹{{ product.price }}</p>
+                            <a href="{% url 'app:details' product.id %}" class="btn btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-results">
+                <span>😕</span><br>
+                No results found for "<strong>{{ query }}</strong>"
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
     </div>
-    {% else %}
-    <p>No results found for "{{ query }}"</p>
-    {% endif %}
-    {% endif %}
 </div>
 
 <script>
@@ -108,5 +251,4 @@
         }
     });
 </script>
-
 {% endblock %}

@@ -1,46 +1,159 @@
 {% extends 'app/base.html' %}
+
+{% block title %}Order Confirmed | PC Shop{% endblock %}
+
 {% block content %}
+<div class="d-flex flex-column" style="min-height: 100vh;">
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000;"></canvas>
 
-<!-- Add AOS CDN in your base.html head if not already -->
-<!-- <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"> -->
-<!-- <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script> -->
-<!-- <script>AOS.init();</script> -->
+    <div class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+        <div class="card border-0 shadow-lg rounded-4" style="width: 100%; max-width: 600px;">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-5">
+                    <div class="checkmark-animation mb-4">
+                        <svg width="100" height="100" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="#28a745" opacity="0.1" />
+                            <path d="M8 12L11 15L16 9" stroke="#28a745" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <circle cx="12" cy="12" r="9" stroke="#28a745" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <h2 class="fw-bold text-success mb-3">Order Confirmed!</h2>
+                    <p class="lead text-muted">Your order #{{ order.id }} has been placed successfully</p>
+                </div>
 
-<div class="container mt-5">
-    <div class="card shadow-lg p-4 border-0" data-aos="fade-up" data-aos-duration="1000">
-        <div class="text-center">
-            <img src="https://cdn-icons-png.flaticon.com/512/958/958140.png" alt="Success" width="100" class="mb-3">
-            <h2 class="mb-3 text-success">Thank You for Your Order!</h2>
-            <p class="fs-5">We’ve received your order and will process it soon.</p>
-        </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h5 class="fw-semibold mb-3">Order Details</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><strong>Order ID:</strong> #{{ order.id }}</li>
+                                <li class="mb-2"><strong>Date:</strong> {{ order.ordered_at }}</li>
+                                <li class="mb-2"><strong>Status:</strong>
+                                    <span class="badge bg-success">{{ order.status }}</span>
+                                </li>
+                                <li><strong>Total:</strong> ₹{{ order.total }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <h5 class="fw-semibold mb-3">Shipping Details</h5>
+                            <p class="mb-0">{{ order.address }}</p>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="mt-4">
-            <p><strong>Order ID:</strong> #{{ order.id }}</p>
-            <p><strong>Status:</strong> {{ order.get_status_display }}</p>
-            <p><strong>Date:</strong> {{ order.ordered_at }}</p>
-            <p><strong>Shipping Address:</strong> {{ order.address }}</p>
-        </div>
+                <div class="mb-4">
+                    <h5 class="fw-semibold mb-3">Order Summary</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>{{ item.product.name }} × {{ item.quantity }}</td>
+                                    <td class="text-end">₹{{ item.get_total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="fw-bold">
+                                    <td>Total</td>
+                                    <td class="text-end text-primary">₹{{ order.total }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-        <h5 class="mt-4">Order Summary</h5>
-        <ul class="list-group mb-4">
-            {% for item in order.items.all %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ item.product.name }} × {{ item.quantity }}
-                <span class="fw-semibold">₹{{ item.get_total_price }}</span>
-            </li>
-            {% endfor %}
-            <li class="list-group-item d-flex justify-content-between bg-light">
-                <strong>Total:</strong>
-                <strong class="text-primary">₹{{ order.total }}</strong>
-            </li>
-        </ul>
-
-        <div class="text-center">
-            <a href="{% url 'app:products' %}" class="btn btn-outline-primary px-4">
-                <i class="bi bi-arrow-left-circle me-1"></i> Continue Shopping
-            </a>
+                <div class="text-center mt-4">
+                    <a href="{% url 'app:products' %}" class="btn btn-primary px-4">
+                        <i class="bi bi-arrow-left-circle me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<script>
+    // Simple confetti effect
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+        const confetti = [];
+
+        // Create confetti pieces
+        for (let i = 0; i < 150; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                r: Math.random() * 4 + 1,
+                d: Math.random() * 3 + 1,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confetti.forEach((dot, i) => {
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
+                ctx.fillStyle = dot.color;
+                ctx.fill();
+
+                dot.y += dot.d;
+                if (dot.y > canvas.height) {
+                    confetti[i] = {
+                        x: Math.random() * canvas.width,
+                        y: -10,
+                        r: dot.r,
+                        d: dot.d,
+                        color: dot.color
+                    };
+                }
+            });
+
+            requestAnimationFrame(drawConfetti);
+        }
+
+        setTimeout(() => {
+            drawConfetti();
+            setTimeout(() => {
+                canvas.style.opacity = '0';
+                setTimeout(() => {
+                    canvas.remove();
+                }, 1000);
+            }, 3000);
+        }, 500);
+    });
+</script>
+
+<style>
+    .checkmark-animation {
+        animation: bounceIn 0.8s ease;
+    }
+
+    @keyframes bounceIn {
+        0% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
 {% endblock %}

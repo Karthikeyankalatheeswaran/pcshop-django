@@ -30,6 +30,10 @@ urlpatterns = [
     path('wishlist/add/<int:product_id>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('wishlist/remove/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
     path('search-suggestions/', views.search_suggestions, name='search_suggestions'),
+    path('build-your-pc/', views.build_pc_view, name='build_pc'),
+    # path('save-build/', views.save_pc_build, name='save_build'),
+    # path('delete-build/<int:build_id>/', views.delete_build, name='delete_build'),
+    path('add-build-to-cart/', views.add_build_to_cart, name='add_build_to_cart'),
 ]
 
 if settings.DEBUG:

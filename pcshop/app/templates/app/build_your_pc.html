@@ -1,0 +1,124 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Custom PC Builder | PC Shop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold mb-3">
+            <i class="bi bi-pc-display-horizontal"></i> Build Your Dream PC
+        </h1>
+        <p class="lead text-muted mx-auto" style="max-width: 700px;">
+            Select high-quality components to create your perfect custom computer
+        </p>
+    </div>
+
+    <!-- Builder Form -->
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header bg-primary text-white py-3">
+            <h3 class="mb-0 fw-semibold">
+                <i class="bi bi-tools me-2"></i> Custom PC Configuration
+            </h3>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <form method="POST" action="{% url 'app:add_build_to_cart' %}">
+                {% csrf_token %}
+
+                {% if product_groups %}
+                <div class="row g-4">
+                    {% for category, products in product_groups.items %}
+                    <div class="col-md-6">
+                        <div class="component-selector">
+                            <label class="form-label fw-semibold mb-2">
+                                <i
+                                    class="bi bi-{% cycle 'motherboard' 'cpu' 'memory' 'gpu' 'device-ssd' 'fan' %} me-2"></i>
+                                {{ category }}
+                            </label>
+                            <select name="{{ category|slugify }}" class="form-select form-select-lg py-2"
+                                onchange="calculateTotal()">
+                                <option value="">-- Select {{ category }} --</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" data-price="{{ product.price }}">
+                                    {{ product.name }} - ₹{{ product.price }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-5 pt-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="fw-bold mb-0">Estimated Total:</h4>
+                            <p class="text-muted small">Prices update automatically</p>
+                        </div>
+                        <div class="display-5 fw-bold text-primary">
+                            ₹<span id="total-price">0.00</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-exclamation-triangle-fill text-warning display-4 mb-3"></i>
+                    <h4 class="fw-semibold">No Components Available</h4>
+                    <p class="text-muted">We're currently restocking our inventory</p>
+                </div>
+                {% endif %}
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg px-4 py-3">
+                        <i class="bi bi-cart-plus-fill me-2"></i> Add Build to Cart
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Price Calculator Script (Your Original Script Preserved) -->
+<script>
+    const selects = document.querySelectorAll("select");
+    const priceDisplay = document.getElementById("total-price");
+
+    function calculateTotal() {
+        let total = 0;
+        selects.forEach(select => {
+            const option = select.options[select.selectedIndex];
+            const price = option.getAttribute('data-price');
+            if (price) total += parseFloat(price);
+        });
+        priceDisplay.textContent = total.toFixed(2);
+    }
+
+    selects.forEach(select => select.addEventListener('change', calculateTotal));
+</script>
+
+<style>
+    .component-selector {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-select-lg {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-select-lg:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
