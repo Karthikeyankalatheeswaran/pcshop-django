@@ -11255,3 +11255,14 @@ body {
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
+
+.carousel {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.carousel-item img {
+  height: 500px;
+  object-fit: cover;
+}
+.carousel-caption {
+  bottom: 25%;
+}
