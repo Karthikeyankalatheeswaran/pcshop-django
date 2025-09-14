@@ -28,3 +28,36 @@ The project includes a modern shopping experience with features like product rev
 
 ⸻
 
+### Setup 
+
+1.	Clone the repository
+
+ 		git clone https://github.com/your-username/django-pc-shop.git
+		cd django-pc-shop
+
+2.	Install dependencies
+
+		pip install -r requirements.txt
+
+3.	Apply migrations
+
+		python manage.py migrate
+
+4.	Create a superuser
+
+		python manage.py createsuperuser
+
+5.	Start the server
+
+		python manage.py runserver
+
+⸻
+
+## Contact 
+
+This is a prototype of an e-commerce pc components site. If you have any doubts or want to talk about this project,
+Feel Free to contact me :
+
+ 	Gmail : kskarthikeyam.p@gmail.com
+
+Website for this project : https://componentpc-k.onrender.com
